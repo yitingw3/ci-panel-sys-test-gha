@@ -1,0 +1,48 @@
+name: Manual Trigger
+
+on:
+  workflow_dispatch:
+    inputs:
+      should_fail:
+        description: "Set to true to simulate a failure"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+      message:
+        description: "Custom message for the run"
+        required: false
+        default: "Triggered from CI Panel"
+        type: string
+
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run task
+        run: |
+          echo "Manual workflow triggered"
+          echo "Message: ${{ inputs.message }}"
+          echo "Should fail: ${{ inputs.should_fail }}"
+          if [ "${{ inputs.should_fail }}" = "true" ]; then
+            echo "Simulating failure..."
+            exit 1
+          fi
+          echo "Task completed successfully."
+      - name: Generate summary
+        if: success()
+        run: |
+          mkdir -p output
+          echo "Run summary - $(date)" > output/summary.txt
+          echo "Status: SUCCESS" >> output/summary.txt
+          echo "Message: ${{ inputs.message }}" >> output/summary.txt
+      - name: Upload summary
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run-summary
+          path: output/
+          retention-days: 30

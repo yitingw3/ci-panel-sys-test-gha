@@ -1,0 +1,55 @@
+name: Multi-Job Pipeline
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      timestamp: ${{ steps.time.outputs.timestamp }}
+    steps:
+      - name: Get timestamp
+        id: time
+        run: echo "timestamp=$(date +%Y%m%d-%H%M%S)" >> "$GITHUB_OUTPUT"
+      - name: Setup environment
+        run: echo "Environment ready at $(date)"
+
+  job-a:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+      - name: Process A
+        run: |
+          echo "Running process A..."
+          echo "Process A complete."
+
+  job-b:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+      - name: Process B
+        run: |
+          echo "Running process B..."
+          echo "Process B complete."
+
+  finalize:
+    runs-on: ubuntu-latest
+    needs: [job-a, job-b]
+    steps:
+      - name: Finalize
+        run: |
+          echo "All jobs completed."
+          echo "Timestamp from setup: ${{ needs.setup.outputs.timestamp }}"
+          mkdir -p results
+          echo "Pipeline complete at $(date)" > results/pipeline-result.txt
+      - name: Upload pipeline result
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-result
+          path: results/
+          retention-days: 30
