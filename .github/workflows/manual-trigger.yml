@@ -45,4 +45,4 @@ jobs:
         with:
           name: run-summary
           path: output/
-          retention-days: 30
+          retention-days: 90

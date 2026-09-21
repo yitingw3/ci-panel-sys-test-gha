@@ -52,4 +52,4 @@ jobs:
         with:
           name: pipeline-result
           path: results/
-          retention-days: 30
+          retention-days: 90

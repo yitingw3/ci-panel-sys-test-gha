@@ -11,13 +11,14 @@ Test repository for CI Panel system tests. Contains GitHub Actions workflows use
 | CI | push, PR, manual | build → test, lint | build-output, test-report | Main workflow: multi-job with dependencies, multiple artifacts |
 | Manual Trigger | manual only | execute | run-summary | Controllable pass/fail via `should_fail` input |
 | Multi-Job Pipeline | push (main), manual | setup → job-a + job-b → finalize | pipeline-result | Fan-out/fan-in job dependency graph |
+| Weekly Refresh | weekly cron (Monday 8:00 UTC), manual | refresh | weekly-refresh | Ensures fresh artifacts are always available |
 
 ## Branches
 
 | Branch | Purpose |
 |--------|---------|
 | main | Default branch, all workflows run here |
-| feature-branch | Secondary branch for testing branch filtering |
+| feature | Secondary branch for testing branch filtering |
 
 ## Test Coverage
 

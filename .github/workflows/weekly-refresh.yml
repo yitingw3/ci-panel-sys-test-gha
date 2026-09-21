@@ -1,0 +1,23 @@
+name: Weekly Refresh
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'  # Every Monday at 8:00 UTC
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate fresh artifact
+        run: |
+          mkdir -p refresh
+          echo "Weekly refresh - $(date)" > refresh/refresh.txt
+          echo "This artifact ensures test data stays available." >> refresh/refresh.txt
+      - name: Upload refresh artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-refresh
+          path: refresh/
+          retention-days: 90

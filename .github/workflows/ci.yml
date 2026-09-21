@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, feature-branch]
+    branches: [main, feature]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -23,7 +23,7 @@ jobs:
         with:
           name: build-output
           path: build/
-          retention-days: 30
+          retention-days: 90
 
   test:
     runs-on: ubuntu-latest
@@ -49,7 +49,7 @@ jobs:
         with:
           name: test-report
           path: reports/
-          retention-days: 30
+          retention-days: 90
 
   lint:
     runs-on: ubuntu-latest
