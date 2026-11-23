@@ -1,0 +1,72 @@
+name: Failing Pipeline
+
+# Intentionally failing workflow for bug-bash / CI Panel failure scenarios.
+# Produces a mixed-status run: success, failure, skipped jobs, plus an artifact
+# uploaded from the failed job.
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/failing-pipeline.yml
+  workflow_dispatch:
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile
+        run: |
+          echo "Compiling sources..."
+          mkdir -p build
+          echo "compiled $(date)" > build/app.txt
+          echo "Compile complete."
+      - name: Upload compile artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: compile-output
+          path: build/
+          retention-days: 90
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    needs: compile
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run unit tests
+        run: |
+          mkdir -p reports
+          {
+            echo "Unit Test Report - $(date)"
+            echo "testAddition ............ PASSED"
+            echo "testSubtraction ......... PASSED"
+            echo "testDivisionByZero ...... FAILED"
+            echo "  Expected: error 'divide:byZero'"
+            echo "  Actual:   Inf"
+            echo "Tests run: 3, Passed: 2, Failed: 1"
+          } | tee reports/unit-test-report.txt
+          echo "::error file=src/hello.m,line=2::testDivisionByZero failed: expected error, got Inf"
+          exit 1
+      - name: Upload unit test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-report
+          path: reports/
+          retention-days: 90
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static analysis
+        run: |
+          echo "Running static analysis..."
+          echo "No issues found."
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [unit-tests, static-analysis]
+    steps:
+      - name: Deploy
+        run: echo "Deploying... (skipped when unit-tests fails)"
